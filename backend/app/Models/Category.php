@@ -52,10 +52,10 @@ class Category extends Model
      */
     protected static function syncToSupabase($model)
     {
-        $supabaseUrl = env('SUPABASE_URL', 'https://axkgduqdqwnyvhzpkrnj.supabase.co');
-        $supabaseServiceKey = env('SUPABASE_SERVICE_ROLE_KEY') ?: env('SUPABASE_ANON_KEY', 'sb_publishable_fc5hf1S68TiQPg4tMbh3-A_vF6oCUkN');
+        $supabaseUrl = env('SUPABASE_URL');
+        $supabaseServiceKey = env('SUPABASE_SERVICE_ROLE_KEY') ?: env('SUPABASE_ANON_KEY');
 
-        if (empty($supabaseUrl)) return;
+        if (empty($supabaseUrl) || empty($supabaseServiceKey)) return;
 
         try {
             // 1. Coba perbarui data di Supabase berdasarkan slug
@@ -91,10 +91,10 @@ class Category extends Model
      */
     protected static function deleteFromSupabase($model)
     {
-        $supabaseUrl = env('SUPABASE_URL', 'https://axkgduqdqwnyvhzpkrnj.supabase.co');
-        $supabaseServiceKey = env('SUPABASE_SERVICE_ROLE_KEY') ?: env('SUPABASE_ANON_KEY', 'sb_publishable_fc5hf1S68TiQPg4tMbh3-A_vF6oCUkN');
+        $supabaseUrl = env('SUPABASE_URL');
+        $supabaseServiceKey = env('SUPABASE_SERVICE_ROLE_KEY') ?: env('SUPABASE_ANON_KEY');
 
-        if (empty($supabaseUrl)) return;
+        if (empty($supabaseUrl) || empty($supabaseServiceKey)) return;
 
         try {
             Http::withHeaders([

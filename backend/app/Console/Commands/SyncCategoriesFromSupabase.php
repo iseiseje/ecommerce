@@ -25,8 +25,13 @@ class SyncCategoriesFromSupabase extends Command
     {
         $this->info('Mengambil data kategori terbaru dari Supabase...');
 
-        $supabaseUrl = env('SUPABASE_URL', 'https://axkgduqdqwnyvhzpkrnj.supabase.co');
-        $supabaseKey = env('SUPABASE_ANON_KEY', 'sb_publishable_fc5hf1S68TiQPg4tMbh3-A_vF6oCUkN');
+        $supabaseUrl = env('SUPABASE_URL');
+        $supabaseKey = env('SUPABASE_ANON_KEY') ?: env('SUPABASE_SERVICE_ROLE_KEY');
+
+        if (empty($supabaseUrl) || empty($supabaseKey)) {
+            $this->error('ERROR: SUPABASE_URL atau SUPABASE_ANON_KEY belum diatur di file .env VPS!');
+            return 1;
+        }
 
         try {
             $response = Http::withHeaders([
