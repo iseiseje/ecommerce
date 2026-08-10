@@ -15,18 +15,9 @@ export const ALL_CATEGORY_TAB: CategoryItem = {
   icon: '🔥',
 };
 
-export const DEFAULT_CATEGORIES: CategoryItem[] = [
-  { id: 'nike', name: 'Nike', slug: 'nike', icon: '✔️' },
-  { id: 'adidas', name: 'Adidas', slug: 'adidas', icon: '👟' },
-  { id: 'puma', name: 'Puma', slug: 'puma', icon: '🐆' },
-  { id: 'rolex', name: 'Rolex', slug: 'rolex', icon: '⌚' },
-  { id: 'gucci', name: 'Gucci', slug: 'gucci', icon: '👜' },
-  { id: 'electronics', name: 'Elektronik', slug: 'electronics', icon: '📱' },
-];
-
 /**
- * Fetch all categories from Supabase DB
- * Prepends the fixed "Semua" filter tab at index 0 for the UI
+ * Fetch all categories 100% dynamically from Supabase DB.
+ * Removes static mock arrays and prepends the fixed "Semua" filter tab for UI.
  */
 export const getCategories = async (): Promise<CategoryItem[]> => {
   try {
@@ -36,13 +27,20 @@ export const getCategories = async (): Promise<CategoryItem[]> => {
       .neq('slug', 'all')
       .order('created_at', { ascending: true });
 
-    if (error || !data || data.length === 0) {
-      return [ALL_CATEGORY_TAB, ...DEFAULT_CATEGORIES];
+    if (error) {
+      console.error('Error fetching categories from Supabase:', error.message || error);
+      return [ALL_CATEGORY_TAB];
     }
+
+    if (!data || data.length === 0) {
+      console.log('No categories found in Supabase DB categories table.');
+      return [ALL_CATEGORY_TAB];
+    }
+
     return [ALL_CATEGORY_TAB, ...data];
   } catch (e) {
-    console.error('Error fetching categories from Supabase:', e);
-    return [ALL_CATEGORY_TAB, ...DEFAULT_CATEGORIES];
+    console.error('Failed to query categories from Supabase:', e);
+    return [ALL_CATEGORY_TAB];
   }
 };
 
@@ -140,7 +138,7 @@ export const subscribeToCategoryChanges = (onUpdate: () => void) => {
         table: 'categories',
       },
       (payload) => {
-        console.log('Realtime Category Event received:', payload);
+        console.log('Realtime Category Event received from Supabase:', payload);
         onUpdate();
       }
     )
