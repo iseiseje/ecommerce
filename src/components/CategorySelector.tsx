@@ -1,6 +1,5 @@
 import React from 'react';
 import { ScrollView, TouchableOpacity, Text, StyleSheet, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 
 export interface Category {
   id: string;
@@ -13,14 +12,12 @@ interface CategorySelectorProps {
   categories: Category[];
   selectedCategoryId: string;
   onSelectCategory: (id: string) => void;
-  onManagePress?: () => void;
 }
 
 export const CategorySelector: React.FC<CategorySelectorProps> = ({
   categories,
   selectedCategoryId,
   onSelectCategory,
-  onManagePress,
 }) => {
   return (
     <View style={styles.wrapper}>
@@ -44,17 +41,6 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
             </TouchableOpacity>
           );
         })}
-
-        {onManagePress && (
-          <TouchableOpacity
-            style={styles.manageChip}
-            onPress={onManagePress}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="settings-outline" size={14} color="#4F46E5" />
-            <Text style={styles.manageLabel}>Kelola</Text>
-          </TouchableOpacity>
-        )}
       </ScrollView>
     </View>
   );
@@ -94,21 +80,5 @@ const styles = StyleSheet.create({
   },
   labelSelected: {
     color: '#FFFFFF',
-  },
-  manageChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#EEF2FF',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: '#C7D2FE',
-    gap: 4,
-  },
-  manageLabel: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#4F46E5',
   },
 });

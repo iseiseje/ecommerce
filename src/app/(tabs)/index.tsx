@@ -13,7 +13,6 @@ import { supabase } from '../../utils/supabase';
 import { useRouter } from 'expo-router';
 import { SearchBar } from '../../components/SearchBar';
 import { CategorySelector } from '../../components/CategorySelector';
-import { CategoryAdminModal } from '../../components/CategoryAdminModal';
 import { BannerCarousel } from '../../components/BannerCarousel';
 import { ProductCard, ProductItem } from '../../components/ProductCard';
 import {
@@ -94,7 +93,6 @@ export default function ShopHomeScreen() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [isCategoryModalVisible, setCategoryModalVisible] = useState(false);
 
   const router = useRouter();
   const { addToCart } = useCart();
@@ -103,9 +101,9 @@ export default function ShopHomeScreen() {
     fetchProducts();
     loadCategories();
 
-    // Subscribe to Supabase Realtime for instant category auto-update!
+    // Subscribe to Supabase Realtime for instant category auto-update when Admin edits categories in VPS!
     const unsubscribe = subscribeToCategoryChanges(() => {
-      console.log('Categories updated via Supabase Realtime!');
+      console.log('Categories updated via Supabase Realtime from VPS Admin!');
       loadCategories();
     });
 
@@ -188,15 +186,13 @@ export default function ShopHomeScreen() {
       <SearchBar
         value={searchQuery}
         onChangeText={setSearchQuery}
-        onFilterPress={() => setCategoryModalVisible(true)}
       />
 
-      {/* Dynamic Supabase Categories */}
+      {/* Dynamic Supabase Categories (Read-Only Client) */}
       <CategorySelector
         categories={categories}
         selectedCategoryId={selectedCategory}
         onSelectCategory={setSelectedCategory}
-        onManagePress={() => setCategoryModalVisible(true)}
       />
 
       {/* Promo Banner Carousel */}
@@ -250,14 +246,6 @@ export default function ShopHomeScreen() {
             <Text style={styles.emptySub}>Coba kata kunci atau kategori lainnya</Text>
           </View>
         }
-      />
-
-      {/* Admin Category Manager Modal */}
-      <CategoryAdminModal
-        visible={isCategoryModalVisible}
-        onClose={() => setCategoryModalVisible(false)}
-        categories={categories}
-        onRefresh={loadCategories}
       />
     </SafeAreaView>
   );
