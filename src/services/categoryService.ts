@@ -8,8 +8,14 @@ export interface CategoryItem {
   created_at?: string;
 }
 
+export const ALL_CATEGORY_TAB: CategoryItem = {
+  id: 'all',
+  name: 'Semua',
+  slug: 'all',
+  icon: '🔥',
+};
+
 export const DEFAULT_CATEGORIES: CategoryItem[] = [
-  { id: 'all', name: 'Semua', slug: 'all', icon: '🔥' },
   { id: 'nike', name: 'Nike', slug: 'nike', icon: '✔️' },
   { id: 'adidas', name: 'Adidas', slug: 'adidas', icon: '👟' },
   { id: 'puma', name: 'Puma', slug: 'puma', icon: '🐆' },
@@ -20,21 +26,23 @@ export const DEFAULT_CATEGORIES: CategoryItem[] = [
 
 /**
  * Fetch all categories from Supabase DB
+ * Prepends the fixed "Semua" filter tab at index 0 for the UI
  */
 export const getCategories = async (): Promise<CategoryItem[]> => {
   try {
     const { data, error } = await supabase
       .from('categories')
       .select('*')
+      .neq('slug', 'all')
       .order('created_at', { ascending: true });
 
     if (error || !data || data.length === 0) {
-      return DEFAULT_CATEGORIES;
+      return [ALL_CATEGORY_TAB, ...DEFAULT_CATEGORIES];
     }
-    return data;
+    return [ALL_CATEGORY_TAB, ...data];
   } catch (e) {
     console.error('Error fetching categories from Supabase:', e);
-    return DEFAULT_CATEGORIES;
+    return [ALL_CATEGORY_TAB, ...DEFAULT_CATEGORIES];
   }
 };
 

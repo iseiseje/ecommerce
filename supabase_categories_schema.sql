@@ -14,38 +14,32 @@ CREATE TABLE IF NOT EXISTS public.categories (
 ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
 
 -- 3. Kebijakan Akses RLS
--- Semua orang (Publik) dapat melihat daftar kategori
 CREATE POLICY "Public categories are viewable by everyone"
 ON public.categories FOR SELECT
 USING ( true );
 
--- Semua pengguna dapat menambahkan kategori baru
 CREATE POLICY "Anyone can insert categories"
 ON public.categories FOR INSERT
 WITH CHECK ( true );
 
--- Semua pengguna dapat memperbarui/mengedit kategori
 CREATE POLICY "Anyone can update categories"
 ON public.categories FOR UPDATE
 USING ( true );
 
--- Semua pengguna dapat menghapus kategori
 CREATE POLICY "Anyone can delete categories"
 ON public.categories FOR DELETE
 USING ( true );
 
--- 4. Tambahkan Sampel Data Kategori Awal
+-- 4. Tambahkan Sampel Data Kategori Awal (Tanpa 'Semua')
 INSERT INTO public.categories (name, slug, icon)
 VALUES
-  ('Semua', 'all', '🔥'),
   ('Nike', 'nike', '✔️'),
   ('Adidas', 'adidas', '👟'),
   ('Puma', 'puma', '🐆'),
   ('Rolex', 'rolex', '⌚'),
-  ('Gucci', 'gucci', '👜'),
+  ('Gucci', 'gucci', 'GB'),
   ('Elektronik', 'electronics', '📱')
 ON CONFLICT (slug) DO NOTHING;
 
 -- 5. Aktifkan Supabase Realtime untuk Tabel Categories
--- Supaya perubahan INSERT/UPDATE/DELETE langsung ter-broadcast ke aplikasi secara live!
 ALTER PUBLICATION supabase_realtime ADD TABLE public.categories;

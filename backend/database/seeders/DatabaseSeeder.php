@@ -18,7 +18,6 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            ['name' => 'Semua', 'slug' => 'all', 'icon' => '🔥'],
             ['name' => 'Nike', 'slug' => 'nike', 'icon' => '✔️'],
             ['name' => 'Adidas', 'slug' => 'adidas', 'icon' => '👟'],
             ['name' => 'Puma', 'slug' => 'puma', 'icon' => '🐆'],

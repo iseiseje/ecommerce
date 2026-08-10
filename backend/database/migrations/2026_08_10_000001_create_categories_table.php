@@ -18,9 +18,8 @@ return new class extends Migration
             $table->timestamp('created_at')->useCurrent();
         });
 
-        // Seed 7 Kategori Awal Beserta Ikon Emoji Ke Dalam Database Backend
+        // Seed Kategori Produk Awal (Tanpa 'Semua')
         $categories = [
-            ['name' => 'Semua', 'slug' => 'all', 'icon' => '🔥'],
             ['name' => 'Nike', 'slug' => 'nike', 'icon' => '✔️'],
             ['name' => 'Adidas', 'slug' => 'adidas', 'icon' => '👟'],
             ['name' => 'Puma', 'slug' => 'puma', 'icon' => '🐆'],
