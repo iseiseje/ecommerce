@@ -3,8 +3,10 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\Category;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,11 +17,25 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $categories = [
+            ['name' => 'Semua', 'slug' => 'all', 'icon' => '🔥'],
+            ['name' => 'Nike', 'slug' => 'nike', 'icon' => '✔️'],
+            ['name' => 'Adidas', 'slug' => 'adidas', 'icon' => '👟'],
+            ['name' => 'Puma', 'slug' => 'puma', 'icon' => '🐆'],
+            ['name' => 'Rolex', 'slug' => 'rolex', 'icon' => '⌚'],
+            ['name' => 'Gucci', 'slug' => 'gucci', 'icon' => '👜'],
+            ['name' => 'Elektronik', 'slug' => 'electronics', 'icon' => '📱'],
+        ];
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        foreach ($categories as $cat) {
+            Category::firstOrCreate(
+                ['slug' => $cat['slug']],
+                [
+                    'id' => (string) Str::uuid(),
+                    'name' => $cat['name'],
+                    'icon' => $cat['icon'],
+                ]
+            );
+        }
     }
 }
