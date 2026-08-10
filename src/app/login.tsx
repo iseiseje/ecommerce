@@ -1,12 +1,33 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  Platform,
+} from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
 import { supabase } from '../utils/supabase';
+import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 
-// Necessary for Expo OAuth flow
 WebBrowser.maybeCompleteAuthSession();
+
+// Inisialisasi Native Google Sign-In dengan Web Client ID
+const GOOGLE_WEB_CLIENT_ID =
+  process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ||
+  'YOUR_GOOGLE_WEB_CLIENT_ID.apps.googleusercontent.com';
+
+if (Platform.OS === 'android' || Platform.OS === 'ios') {
+  GoogleSignin.configure({
+    webClientId: GOOGLE_WEB_CLIENT_ID,
+    scopes: ['profile', 'email'],
+  });
+}
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -18,7 +39,7 @@ export default function LoginScreen() {
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
-      Alert.alert('Sign In Failed', error.message);
+      Alert.alert('Masuk Gagal', error.message);
     } else {
       router.back();
     }
@@ -29,9 +50,9 @@ export default function LoginScreen() {
     setLoading(true);
     const { error } = await supabase.auth.signUp({ email, password });
     if (error) {
-      Alert.alert('Sign Up Failed', error.message);
+      Alert.alert('Pendaftaran Gagal', error.message);
     } else {
-      Alert.alert('Success', 'Check your email for the confirmation link.');
+      Alert.alert('Sukses', 'Periksa email Anda untuk tautan konfirmasi.');
     }
     setLoading(false);
   };
@@ -39,52 +60,76 @@ export default function LoginScreen() {
   const handleGoogleSignIn = async () => {
     setLoading(true);
     try {
-      const redirectUrl = Linking.createURL('/');
-      // Tambahkan baris ini sementara agar Anda bisa melihat URL yang dihasilkan:
-      console.log('My Redirect URL:', redirectUrl);
-      Alert.alert('Redirect URL', `Masukkan ini ke Supabase:\n\n${redirectUrl}**\n\nAtau ganti Site URL Anda jadi ini sementara.`);
-      
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      // 1. Platform WEB (Browser)
+      if (Platform.OS === 'web') {
+        const webRedirectUrl = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:8081';
+        
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: webRedirectUrl,
+            queryParams: {
+              access_type: 'offline',
+              prompt: 'select_account',
+            },
+          },
+        });
+
+        if (error) throw error;
+
+        if (data?.url && typeof window !== 'undefined') {
+          window.location.href = data.url;
+        }
+        return;
+      }
+
+      // 2. Platform MOBILE (Android & iOS Native)
+      if (!GOOGLE_WEB_CLIENT_ID || GOOGLE_WEB_CLIENT_ID.includes('YOUR_GOOGLE_WEB_CLIENT_ID')) {
+        Alert.alert(
+          'Web Client ID Belum Diatur',
+          'Silakan masukkan Web Client ID Google Cloud Anda ke file .env pada variabel EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID.'
+        );
+        setLoading(false);
+        return;
+      }
+
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+      const signInResult = await GoogleSignin.signIn();
+
+      const idToken = signInResult?.data?.idToken || (signInResult as any)?.idToken;
+
+      if (!idToken) {
+        throw new Error('Tidak ada ID Token yang diterima dari Google.');
+      }
+
+      const { data, error } = await supabase.auth.signInWithIdToken({
         provider: 'google',
-        options: {
-          redirectTo: redirectUrl,
-          skipBrowserRedirect: true,
-        },
+        token: idToken,
       });
 
       if (error) throw error;
 
-      if (data?.url) {
-        const res = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl);
-        
-        if (res.type === 'success' && res.url) {
-          // Parse the access token from the URL fragment (e.g. #access_token=...)
-          const urlObj = new URL(res.url.replace('#', '?'));
-          const access_token = urlObj.searchParams.get('access_token');
-          const refresh_token = urlObj.searchParams.get('refresh_token');
-          
-          if (access_token && refresh_token) {
-            const { error: sessionError } = await supabase.auth.setSession({
-              access_token,
-              refresh_token,
-            });
-            if (sessionError) throw sessionError;
-            router.replace('/');
-          }
-        }
+      Alert.alert('Berhasil Masuk', `Selamat datang, ${data.user?.email}!`);
+      router.replace('/(tabs)');
+    } catch (error: any) {
+      console.error('Google Sign In Error:', error);
+      if (error.code === statusCodes?.SIGN_IN_CANCELLED) {
+        // User membatalkan login
+      } else if (error.code === statusCodes?.IN_PROGRESS) {
+        // Sign-in sedang berjalan
+      } else if (error.code === statusCodes?.PLAY_SERVICES_NOT_AVAILABLE) {
+        Alert.alert('Error', 'Google Play Services tidak tersedia pada perangkat.');
+      } else {
+        Alert.alert('Google Sign In Gagal', error?.message || 'Terjadi kesalahan saat masuk.');
       }
-    } catch (error) {
-      console.error(error);
-      Alert.alert('Google Sign In Failed', error.message || 'Something went wrong');
     } finally {
       setLoading(false);
     }
   };
 
-
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Welcome Back</Text>
+      <Text style={styles.title}>Selamat Datang</Text>
 
       <View style={styles.formContainer}>
         <TextInput
@@ -104,27 +149,23 @@ export default function LoginScreen() {
         />
 
         <TouchableOpacity style={styles.primaryButton} onPress={handleEmailSignIn} disabled={loading}>
-          {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryButtonText}>Sign In</Text>}
+          {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryButtonText}>Masuk</Text>}
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.secondaryButton} onPress={handleEmailSignUp} disabled={loading}>
-          <Text style={styles.secondaryButtonText}>Create Account</Text>
+          <Text style={styles.secondaryButtonText}>Buat Akun Baru</Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.dividerContainer}>
         <View style={styles.divider} />
-        <Text style={styles.dividerText}>OR</Text>
+        <Text style={styles.dividerText}>ATAU</Text>
         <View style={styles.divider} />
       </View>
 
       <TouchableOpacity style={styles.googleButton} onPress={handleGoogleSignIn} disabled={loading}>
-        <Text style={styles.googleButtonText}>Continue with Google</Text>
+        <Text style={styles.googleButtonText}>🚀 Masuk Akun Google</Text>
       </TouchableOpacity>
-
-      <Text style={{ marginTop: 20, textAlign: 'center', fontSize: 12, color: 'gray' }}>
-        Redirect URL Anda: {Linking.createURL('/')}
-      </Text>
     </View>
   );
 }
@@ -132,76 +173,84 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    padding: 20,
+    backgroundColor: '#F8FAFC',
+    padding: 24,
     justifyContent: 'center',
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
-    color: '#000',
-    marginBottom: 40,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 32,
     textAlign: 'center',
   },
   formContainer: {
     marginBottom: 20,
   },
   input: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#eaeaea',
-    borderRadius: 8,
-    padding: 15,
-    marginBottom: 15,
-    fontSize: 16,
+    borderColor: '#E2E8F0',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 14,
+    fontSize: 15,
+    color: '#0F172A',
   },
   primaryButton: {
-    backgroundColor: '#000',
-    paddingVertical: 15,
-    borderRadius: 8,
+    backgroundColor: '#0F172A',
+    paddingVertical: 14,
+    borderRadius: 12,
     alignItems: 'center',
     marginBottom: 10,
   },
   primaryButtonText: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   secondaryButton: {
-    paddingVertical: 15,
-    borderRadius: 8,
+    paddingVertical: 14,
+    borderRadius: 12,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#000',
+    borderColor: '#0F172A',
   },
   secondaryButtonText: {
-    color: '#000',
+    color: '#0F172A',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   dividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginVertical: 20,
   },
   divider: {
     flex: 1,
     height: 1,
-    backgroundColor: '#eaeaea',
+    backgroundColor: '#E2E8F0',
   },
   dividerText: {
-    marginHorizontal: 10,
-    color: '#888',
+    marginHorizontal: 12,
+    color: '#94A3B8',
+    fontWeight: '600',
+    fontSize: 12,
   },
   googleButton: {
     backgroundColor: '#4285F4',
-    paddingVertical: 15,
-    borderRadius: 8,
+    paddingVertical: 14,
+    borderRadius: 12,
     alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#4285F4',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   googleButtonText: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '800',
   },
 });
