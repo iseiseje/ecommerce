@@ -15,7 +15,7 @@ class VariantsRelationManager extends RelationManager
     public function form(Schema $schema): Schema
     {
         return $schema
-            ->schema([
+            ->components([
                 Forms\Components\TextInput::make('attribute_name')
                     ->required()
                     ->maxLength(255)

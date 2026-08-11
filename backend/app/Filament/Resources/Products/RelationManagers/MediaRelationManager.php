@@ -15,7 +15,7 @@ class MediaRelationManager extends RelationManager
     public function form(Schema $schema): Schema
     {
         return $schema
-            ->schema([
+            ->components([
                 Forms\Components\TextInput::make('url')
                     ->required()
                     ->url()
