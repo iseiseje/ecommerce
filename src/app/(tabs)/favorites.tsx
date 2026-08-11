@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, FlatList, SafeAreaView } from 'react-native';
+import { View, StyleSheet, FlatList, SafeAreaView, useWindowDimensions } from 'react-native';
 import { useFavorites } from '../../context/FavoritesContext';
 import { ProductCard } from '../../components/ProductCard';
 import { EmptyState } from '../../components/EmptyState';
@@ -10,6 +10,10 @@ export default function FavoritesScreen() {
   const { favorites } = useFavorites();
   const { addToCart } = useCart();
   const router = useRouter();
+  const { width } = useWindowDimensions();
+
+  // Responsive columns based on screen width
+  const numColumns = width >= 1024 ? 4 : width >= 768 ? 3 : 2;
 
   if (favorites.length === 0) {
     return (
@@ -28,18 +32,20 @@ export default function FavoritesScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <FlatList
+        key={numColumns}
         data={favorites}
         keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => (
-          <ProductCard
-            product={item}
-            onPress={() => router.push(`/product/${item.id}`)}
-            onAddToCart={() => addToCart(item)}
-          />
+          <View style={{ flex: 1, padding: 8, maxWidth: `${100 / numColumns}%` }}>
+            <ProductCard
+              product={item}
+              onPress={() => router.push(`/product/${item.id}`)}
+              onAddToCart={() => addToCart(item)}
+            />
+          </View>
         )}
-        numColumns={2}
+        numColumns={numColumns}
         contentContainerStyle={styles.listPadding}
-        columnWrapperStyle={styles.columnWrapper}
         showsVerticalScrollIndicator={false}
       />
     </SafeAreaView>

@@ -9,14 +9,26 @@ class Order extends Model
 {
     use HasFactory;
 
-    protected $keyType = 'string';
-    public $incrementing = false;
-    public $timestamps = false;
-
     protected $fillable = [
         'user_id',
-        'amount',
         'status',
-        'checkout_url'
+        'total_amount',
+        'tracking_number',
+        'shipping_address_id'
     ];
+
+    public function items()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
+    public function shippingAddress()
+    {
+        return $this->belongsTo(UserAddress::class, 'shipping_address_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

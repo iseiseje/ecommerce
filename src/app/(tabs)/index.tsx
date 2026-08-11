@@ -8,12 +8,14 @@ import {
   SafeAreaView,
   TouchableOpacity,
   Image,
+  useWindowDimensions,
 } from 'react-native';
 import { supabase } from '../../utils/supabase';
 import { useRouter } from 'expo-router';
 import { SearchBar } from '../../components/SearchBar';
 import { CategorySelector } from '../../components/CategorySelector';
 import { BannerCarousel } from '../../components/BannerCarousel';
+import { FlashSale } from '../../components/FlashSale';
 import { ProductCard, ProductItem } from '../../components/ProductCard';
 import {
   CategoryItem,
@@ -96,6 +98,10 @@ export default function ShopHomeScreen() {
 
   const router = useRouter();
   const { addToCart } = useCart();
+  const { width } = useWindowDimensions();
+
+  // Responsive columns based on screen width
+  const numColumns = width >= 1024 ? 4 : width >= 768 ? 3 : 2;
 
   useEffect(() => {
     fetchProducts();
@@ -204,6 +210,9 @@ export default function ShopHomeScreen() {
         }}
       />
 
+      {/* Flash Sale Component */}
+      <FlashSale />
+
       {/* Section Title */}
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Produk Populer</Text>
@@ -225,19 +234,21 @@ export default function ShopHomeScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <FlatList
+        key={numColumns}
         data={filteredProducts}
         keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => (
-          <ProductCard
-            product={item}
-            onPress={() => router.push(`/product/${item.id}`)}
-            onAddToCart={() => addToCart(item)}
-          />
+          <View style={{ flex: 1, padding: 8, maxWidth: `${100 / numColumns}%` }}>
+            <ProductCard
+              product={item}
+              onPress={() => router.push(`/product/${item.id}`)}
+              onAddToCart={() => addToCart(item)}
+            />
+          </View>
         )}
-        numColumns={2}
+        numColumns={numColumns}
         ListHeaderComponent={renderHeader}
         contentContainerStyle={styles.listPadding}
-        columnWrapperStyle={styles.columnWrapper}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>

@@ -11,13 +11,35 @@ class Product extends Model
 
     protected $keyType = 'string';
     public $incrementing = false;
-    public $timestamps = false; // Supabase uses created_at, but we'll disable standard Eloquent timestamps to avoid issues, or we can just map them.
+    public $timestamps = false; 
 
     protected $fillable = [
+        'category_id',
         'name',
+        'slug',
         'description',
         'price',
+        'discount_price',
+        'stock',
+        'rating',
+        'reviews_count',
         'image_url',
+        'is_active',
         'genlook_external_id'
     ];
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function variants()
+    {
+        return $this->hasMany(ProductVariant::class);
+    }
+
+    public function media()
+    {
+        return $this->hasMany(ProductMedia::class);
+    }
 }

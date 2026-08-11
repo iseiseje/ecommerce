@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Orders\Schemas;
 
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Schema;
 
 class OrderForm
@@ -10,18 +12,19 @@ class OrderForm
     {
         return $schema
             ->components([
-                \Filament\Forms\Components\TextInput::make('user_id')
-                    ->required()
-                    ->maxLength(255),
-                \Filament\Forms\Components\TextInput::make('amount')
+                TextInput::make('user_id'),
+                TextInput::make('amount')
                     ->required()
                     ->numeric(),
-                \Filament\Forms\Components\TextInput::make('status')
+                Textarea::make('status')
                     ->required()
-                    ->maxLength(255),
-                \Filament\Forms\Components\TextInput::make('checkout_url')
-                    ->url()
-                    ->maxLength(255),
+                    ->default('pending')
+                    ->columnSpanFull(),
+                Textarea::make('checkout_url')
+                    ->columnSpanFull(),
+                TextInput::make('tracking_number'),
+                TextInput::make('shipping_address_id')
+                    ->numeric(),
             ]);
     }
 }

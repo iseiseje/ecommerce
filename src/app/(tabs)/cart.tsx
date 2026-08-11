@@ -14,6 +14,7 @@ import { useCart } from '../../context/CartContext';
 import { EmptyState } from '../../components/EmptyState';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { supabase } from '../../utils/supabase';
 
 export default function CartScreen() {
   const { cart, updateQuantity, removeFromCart, cartTotal } = useCart();
@@ -21,17 +22,58 @@ export default function CartScreen() {
   const [discountAmount, setDiscountAmount] = useState(0);
   const router = useRouter();
 
-  const handleApplyPromo = () => {
-    if (promoCode.trim().toUpperCase() === 'DISCOUNT10') {
-      const disc = cartTotal * 0.1;
+  const handleApplyPromo = async () => {
+    if (!promoCode.trim()) {
+      Alert.alert('Error', 'Masukkan kode voucher terlebih dahulu');
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('coupons')
+        .select('*')
+        .eq('code', promoCode.trim().toUpperCase())
+        .single();
+
+      if (error || !data) {
+        Alert.alert('Voucher Tidak Valid', 'Kode voucher tidak ditemukan atau sudah tidak berlaku.');
+        setDiscountAmount(0);
+        return;
+      }
+
+      // Validations
+      const now = new Date().toISOString();
+      if (data.valid_from && data.valid_from > now) {
+        Alert.alert('Voucher Belum Aktif', 'Kupon ini belum bisa digunakan.');
+        return;
+      }
+      if (data.valid_until && data.valid_until < now) {
+        Alert.alert('Voucher Kedaluwarsa', 'Masa berlaku kupon ini sudah habis.');
+        return;
+      }
+      if (data.usage_limit !== null && data.used_count >= data.usage_limit) {
+        Alert.alert('Voucher Habis', 'Kuota penggunaan kupon ini sudah habis.');
+        return;
+      }
+      if (data.min_purchase && cartTotal < Number(data.min_purchase)) {
+        Alert.alert('Gagal', `Minimal pembelian untuk menggunakan kupon ini adalah Rp ${Number(data.min_purchase).toLocaleString('id-ID')}`);
+        return;
+      }
+
+      let disc = 0;
+      if (data.discount_type === 'percentage') {
+        disc = cartTotal * (Number(data.discount_value) / 100);
+        if (data.max_discount && disc > Number(data.max_discount)) {
+          disc = Number(data.max_discount);
+        }
+      } else {
+        disc = Number(data.discount_value);
+      }
+
       setDiscountAmount(disc);
-      Alert.alert('Sukses!', 'Voucher 10% berhasil dipasang');
-    } else if (promoCode.trim().toUpperCase() === 'DISKON50') {
-      const disc = cartTotal * 0.5;
-      setDiscountAmount(disc);
-      Alert.alert('Sukses!', 'Voucher 50% berhasil dipasang!');
-    } else {
-      Alert.alert('Voucher Tidak Valid', 'Gunakan kode PROMO: DISCOUNT10 atau DISKON50');
+      Alert.alert('Sukses!', 'Voucher berhasil dipasang!');
+    } catch (e: any) {
+      Alert.alert('Error', e.message);
     }
   };
 

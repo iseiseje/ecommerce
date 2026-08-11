@@ -16,14 +16,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
 import { useFavorites } from '../../context/FavoritesContext';
 import { useCart } from '../../context/CartContext';
+import { Linking } from 'react-native';
 
 const MENU_ITEMS = [
-  { id: 'orders', title: 'Pesanan Saya', icon: 'cube-outline', badge: '2 Aktif' },
-  { id: 'address', title: 'Alamat Pengiriman', icon: 'location-outline' },
+  { id: 'orders', title: 'Pesanan Saya', icon: 'cube-outline', route: '/orders', badge: '2 Aktif' },
+  { id: 'address', title: 'Alamat Pengiriman', icon: 'location-outline', route: '/address' },
   { id: 'payment', title: 'Metode Pembayaran', icon: 'card-outline' },
   { id: 'tryon', title: 'Galeri Virtual Try-On', icon: 'sparkles-outline' },
-  { id: 'notifications', title: 'Notifikasi & Promo', icon: 'notifications-outline' },
-  { id: 'help', title: 'Bantuan & FAQ', icon: 'help-circle-outline' },
+  { id: 'promos', title: 'Promo', icon: 'pricetag-outline', route: '/promos' },
+  { id: 'help', title: 'Hubungi CS (WhatsApp)', icon: 'logo-whatsapp', isExternal: true },
 ];
 
 export default function ProfileScreen() {
@@ -59,6 +60,16 @@ export default function ProfileScreen() {
       console.error('Error fetching tryon history:', e);
     } finally {
       setHistoryLoading(false);
+    }
+  };
+
+  const handleMenuPress = (item: any) => {
+    if (item.isExternal && item.id === 'help') {
+      Linking.openURL('whatsapp://send?phone=+6285805449214');
+    } else if (item.route) {
+      router.push(item.route);
+    } else {
+      alert(`Fitur ${item.title} belum tersedia.`);
     }
   };
 
@@ -133,9 +144,7 @@ export default function ProfileScreen() {
             <TouchableOpacity
               key={item.id}
               style={styles.menuItem}
-              onPress={() => {
-                alert(`Membuka: ${item.title}`);
-              }}
+              onPress={() => handleMenuPress(item)}
               activeOpacity={0.7}
             >
               <View style={styles.menuLeft}>
