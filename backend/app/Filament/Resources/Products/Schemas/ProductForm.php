@@ -18,6 +18,10 @@ class ProductForm
                     ->nullable(),
                 \Filament\Forms\Components\TextInput::make('slug')
                     ->maxLength(255),
+                \Filament\Forms\Components\TextInput::make('genlook_external_id')
+                    ->label('Genlook ID')
+                    ->maxLength(255)
+                    ->nullable(),
                 \Filament\Forms\Components\TextInput::make('price')
                     ->required()
                     ->numeric(),
