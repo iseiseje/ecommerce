@@ -30,7 +30,7 @@ export default function CheckoutScreen() {
     address: 'Jl. Jenderal Sudirman No. 45, Jakarta Selatan',
   });
 
-  const shippingFee = shippingMethod === 'express' ? 18.0 : 12.0;
+  const shippingFee = shippingMethod === 'express' ? 15 : 12;
   const finalTotal = cartTotal + shippingFee;
 
   const handleInputChange = (field: string, value: string) => {
@@ -55,7 +55,7 @@ export default function CheckoutScreen() {
         .insert({
           user_id: user?.id || null, // null if guest
           status: 'Menunggu Pembayaran',
-          total_amount: finalTotal,
+          amount: finalTotal,
           tracking_number: `ORD-${Date.now()}`
         })
         .select()
@@ -85,6 +85,7 @@ export default function CheckoutScreen() {
       // Invoke Supabase Edge Function for RainyPay QRIS
       const { data, error } = await supabase.functions.invoke('rainypay-create', {
         body: {
+          order_id: orderData.id,
           amount: finalTotal,
           redirect_url: Linking.createURL('/(tabs)'),
         },
@@ -97,11 +98,11 @@ export default function CheckoutScreen() {
           clearCart();
           Alert.alert(
             'Pembayaran Berhasil! 🎉',
-            `Pesanan sebesar $${finalTotal.toFixed(2)} dengan metode QRIS RainyPay telah dikonfirmasi.`,
+            `Pesanan sebesar Rp ${Number(finalTotal).toLocaleString('id-ID')} dengan metode QRIS RainyPay telah dikonfirmasi.`,
             [
               {
                 text: 'Kembali ke Beranda',
-                onPress: () => router.replace('/(tabs)'),
+                onPress: () => router.replace('/orders'),
               },
             ]
           );
@@ -110,20 +111,17 @@ export default function CheckoutScreen() {
       }
 
       // Open RainyPay Checkout WebBrowser
-      await WebBrowser.openBrowserAsync(data.checkout_url);
+      WebBrowser.openBrowserAsync(data.checkout_url);
       clearCart();
-      Alert.alert('Pembayaran Diproses', 'Silakan periksa halaman profil/pesanan untuk status terbaru.', [
-        { text: 'Tutup', onPress: () => router.replace('/(tabs)') },
-      ]);
+      router.replace('/orders');
     } catch (err: any) {
-      clearCart();
       Alert.alert(
-        'Pembayaran Berhasil (Offline Simulation)',
-        `Pesanan sebesar $${finalTotal.toFixed(2)} telah dikonfirmasi. Error: ${err.message}`,
+        'Pembayaran Gagal',
+        `Maaf, terjadi kesalahan: ${err.message}`,
         [
           {
-            text: 'Kembali ke Beranda',
-            onPress: () => router.replace('/(tabs)'),
+            text: 'Tutup',
+            style: 'cancel',
           },
         ]
       );
@@ -187,7 +185,7 @@ export default function CheckoutScreen() {
                 activeOpacity={0.8}
               >
                 <Text style={styles.shippingName}>Standard (2-3 Hari)</Text>
-                <Text style={styles.shippingPrice}>$12.00</Text>
+                <Text style={styles.shippingPrice}>Rp 12</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -199,7 +197,7 @@ export default function CheckoutScreen() {
                 activeOpacity={0.8}
               >
                 <Text style={styles.shippingName}>Express (1 Hari)</Text>
-                <Text style={styles.shippingPrice}>$18.00</Text>
+                <Text style={styles.shippingPrice}>Rp 15</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -259,16 +257,16 @@ export default function CheckoutScreen() {
             <Text style={styles.summaryCardTitle}>Ringkasan Pesanan ({cart.length} barang)</Text>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Subtotal Produk</Text>
-              <Text style={styles.summaryVal}>${cartTotal.toFixed(2)}</Text>
+              <Text style={styles.summaryVal}>Rp {Number(cartTotal).toLocaleString('id-ID')}</Text>
             </View>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Ongkos Kirim</Text>
-              <Text style={styles.summaryVal}>${shippingFee.toFixed(2)}</Text>
+              <Text style={styles.summaryVal}>Rp {Number(shippingFee).toLocaleString('id-ID')}</Text>
             </View>
             <View style={styles.divider} />
             <View style={styles.summaryRow}>
               <Text style={styles.totalLabel}>Total Harus Dibayar</Text>
-              <Text style={styles.totalVal}>${finalTotal.toFixed(2)}</Text>
+              <Text style={styles.totalVal}>Rp {Number(finalTotal).toLocaleString('id-ID')}</Text>
             </View>
           </View>
         </ScrollView>
@@ -285,7 +283,7 @@ export default function CheckoutScreen() {
               <ActivityIndicator color="#FFFFFF" />
             ) : (
               <>
-                <Text style={styles.payButtonText}>Bayar Sekarang (${finalTotal.toFixed(2)})</Text>
+                <Text style={styles.payButtonText}>Bayar Sekarang (Rp {Number(finalTotal).toLocaleString('id-ID')})</Text>
                 <Ionicons name="lock-closed" size={16} color="#FFFFFF" />
               </>
             )}

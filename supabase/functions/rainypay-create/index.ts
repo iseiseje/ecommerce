@@ -24,23 +24,17 @@ serve(async (req) => {
     );
 
     const { data: { user } } = await supabaseClient.auth.getUser();
-    if (!user) throw new Error('Unauthorized');
+    // Allow guest checkout, user can be null.
 
-    const { amount, redirect_url } = await req.json();
+    const { order_id, amount, redirect_url } = await req.json();
 
     if (!amount || amount <= 0) {
       throw new Error("Invalid amount");
     }
-
-    // 1. Create Order in Supabase
-    const { data: order, error: orderError } = await supabaseClient
-      .from('orders')
-      .insert({ user_id: user.id, amount, status: 'pending' })
-      .select('id')
-      .single();
-
-    if (orderError) throw orderError;
-    if (!order) throw new Error("Gagal membuat pesanan di database. Coba lagi.");
+    
+    if (!order_id) {
+      throw new Error("Missing order_id");
+    }
 
     // 2. Call RainyPay API
     const RAINYPAY_API_KEY = Deno.env.get('RAINYPAY_API_KEY');
@@ -52,19 +46,20 @@ serve(async (req) => {
 
     const payload: any = {
       amount: parseInt(amount),
-      external_id: order.id,
+      external_id: String(order_id),
       description: "Order Checkout",
       fee_mode: "customer", // customer pays the fee
       expiry_minutes: 15,
     };
 
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || "https://axkgduqdqwnyvhzpkrnj.supabase.co";
     // RainyPay hanya menerima http/https untuk redirect URL
     if (redirect_url && redirect_url.startsWith('http')) {
       payload.success_redirect_url = redirect_url;
       payload.failed_redirect_url = redirect_url;
     } else {
-      payload.success_redirect_url = "https://axkgduqdqwnyvhzpkrnj.supabase.co"; // Fallback URL valid
-      payload.failed_redirect_url = "https://axkgduqdqwnyvhzpkrnj.supabase.co";
+      payload.success_redirect_url = supabaseUrl; // Fallback URL valid
+      payload.failed_redirect_url = supabaseUrl;
     }
 
     if (RAINYPAY_WEBHOOK_URL) {
@@ -76,7 +71,7 @@ serve(async (req) => {
       headers: {
         "Authorization": `Bearer ${RAINYPAY_API_KEY}`,
         "Content-Type": "application/json",
-        "Idempotency-Key": `create-order-${order.id}`
+        "Idempotency-Key": `create-order-${order_id}`
       },
       body: JSON.stringify(payload)
     });
@@ -99,9 +94,9 @@ serve(async (req) => {
     await supabaseClient
       .from('orders')
       .update({ checkout_url: data.payment.checkout_url })
-      .eq('id', order.id);
+      .eq('id', order_id);
 
-    return new Response(JSON.stringify({ checkout_url: data.payment.checkout_url, order_id: order.id }), {
+    return new Response(JSON.stringify({ checkout_url: data.payment.checkout_url, order_id: order_id }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });

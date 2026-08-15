@@ -149,7 +149,9 @@ export default function ProductDetailScreen() {
   const groupedVariants = groupVariants(product.product_variants || []);
 
   const renderMediaItem = ({ item }: { item: string }) => (
-    <Image source={{ uri: item }} style={[styles.productImage, { width: screenWidth }]} />
+    <View style={{ width: screenWidth, height: 380 }}>
+      <Image source={{ uri: item }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+    </View>
   );
 
   return (
@@ -169,7 +171,7 @@ export default function ProductDetailScreen() {
             />
             
             {/* Top Action Controls */}
-            <TouchableOpacity style={styles.topBackBtn} onPress={() => router.back()}>
+            <TouchableOpacity style={styles.topBackBtn} onPress={() => router.canGoBack() ? router.back() : router.replace('/')}>
               <Ionicons name="arrow-back" size={20} color="#0F172A" />
             </TouchableOpacity>
 
@@ -199,7 +201,7 @@ export default function ProductDetailScreen() {
             <Text style={styles.productName}>{product.name}</Text>
 
             <View style={styles.priceRow}>
-              <Text style={styles.priceText}>${currentPrice.toFixed(2)}</Text>
+              <Text style={styles.priceText}>Rp {currentPrice.toLocaleString('id-ID')}</Text>
             </View>
 
             {/* Dynamic Variant Selectors */}
@@ -220,7 +222,7 @@ export default function ProductDetailScreen() {
                         </Text>
                         {Number(variant.price_adjustment) > 0 && (
                           <Text style={[styles.variantExtraPrice, isSelected && styles.variantTextSelected]}>
-                            +${Number(variant.price_adjustment).toFixed(2)}
+                            +Rp {Number(variant.price_adjustment).toLocaleString('id-ID')}
                           </Text>
                         )}
                       </TouchableOpacity>
@@ -277,7 +279,7 @@ const styles = StyleSheet.create({
   centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   scrollContent: { paddingBottom: 110 },
   imageWrapper: { position: 'relative', width: '100%', height: 380, backgroundColor: '#F5F6F8' },
-  productImage: { height: '100%', resizeMode: 'contain' },
+  productImage: { height: '100%' },
   topBackBtn: { position: 'absolute', top: 16, left: 16, backgroundColor: '#FFFFFF', width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 },
   topFavBtn: { position: 'absolute', top: 16, right: 16, backgroundColor: '#FFFFFF', width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 },
   detailsContainer: { padding: 20, backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, marginTop: -20 },

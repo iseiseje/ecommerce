@@ -52,6 +52,7 @@ export default function OrdersScreen() {
     switch (status) {
       case 'Dikirim': return '#3B82F6';
       case 'Selesai': return '#10B981';
+      case 'paid':
       case 'Diproses': return '#F59E0B';
       case 'Menunggu Pembayaran': return '#EF4444';
       default: return '#64748B';
@@ -62,10 +63,16 @@ export default function OrdersScreen() {
     switch (status) {
       case 'Dikirim': return '#EFF6FF';
       case 'Selesai': return '#ECFDF5';
+      case 'paid':
       case 'Diproses': return '#FFFBEB';
       case 'Menunggu Pembayaran': return '#FEF2F2';
       default: return '#F1F5F9';
     }
+  };
+
+  const formatStatus = (status: string) => {
+    if (status === 'paid') return 'Diproses';
+    return status;
   };
 
   const formatDate = (dateString: string) => {
@@ -76,7 +83,13 @@ export default function OrdersScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => {
+          if (router.canGoBack()) {
+            router.back();
+          } else {
+            router.replace('/(tabs)/profile');
+          }
+        }}>
           <Ionicons name="arrow-back" size={24} color="#0F172A" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Pesanan Saya</Text>
@@ -102,7 +115,7 @@ export default function OrdersScreen() {
                     <Text style={styles.orderDate}>{formatDate(item.created_at)}</Text>
                   </View>
                   <View style={[styles.statusBadge, { backgroundColor: getStatusBg(item.status) }]}>
-                    <Text style={[styles.statusText, { color: getStatusColor(item.status) }]}>{item.status}</Text>
+                    <Text style={[styles.statusText, { color: getStatusColor(item.status) }]}>{formatStatus(item.status)}</Text>
                   </View>
                 </View>
 
@@ -111,7 +124,7 @@ export default function OrdersScreen() {
                 <View style={styles.orderDetails}>
                   <View style={styles.detailItem}>
                     <Text style={styles.detailLabel}>Total Harga</Text>
-                    <Text style={styles.detailValue}>${Number(item.total_amount).toFixed(2)}</Text>
+                    <Text style={styles.detailValue}>Rp {Number(item.amount).toLocaleString('id-ID')}</Text>
                   </View>
                   <View style={styles.detailItem}>
                     <Text style={styles.detailLabel}>Jumlah Barang</Text>
@@ -126,7 +139,10 @@ export default function OrdersScreen() {
                   </View>
                 )}
 
-                <TouchableOpacity style={styles.actionBtn}>
+                <TouchableOpacity 
+                  style={styles.actionBtn}
+                  onPress={() => router.push(`/order/${item.id}`)}
+                >
                   <Text style={styles.actionBtnText}>Lihat Detail</Text>
                 </TouchableOpacity>
               </View>

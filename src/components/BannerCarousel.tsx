@@ -94,7 +94,7 @@ export const BannerCarousel: React.FC<BannerCarouselProps> = ({
             activeOpacity={0.9}
             onPress={() => onBannerPress && onBannerPress(item)}
           >
-            <Image source={{ uri: item.image }} style={styles.bannerImage} />
+            <Image source={{ uri: item.image }} style={styles.bannerImage} resizeMode="cover" />
             <View style={styles.overlay} />
             <View style={styles.content}>
               <View style={styles.tagBadge}>
@@ -142,7 +142,6 @@ const styles = StyleSheet.create({
   bannerImage: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
   },
   overlay: {
     ...StyleSheet.absoluteFill,

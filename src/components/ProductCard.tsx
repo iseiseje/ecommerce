@@ -56,6 +56,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         <Image
           source={{ uri: product.image_url || 'https://via.placeholder.com/300' }}
           style={styles.image}
+          resizeMode="contain"
         />
         
         {/* Carousel Dots */}
@@ -169,7 +170,6 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: '100%',
-    resizeMode: 'contain',
   },
   imageTopNav: {
     position: 'absolute',

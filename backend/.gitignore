@@ -25,3 +25,9 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Temporary scripts
+check_*.php
+create_policy*.php
+configure_*.php
+test_*.php

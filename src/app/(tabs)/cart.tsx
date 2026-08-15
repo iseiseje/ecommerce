@@ -77,7 +77,7 @@ export default function CartScreen() {
     }
   };
 
-  const shippingCost = cart.length > 0 ? 12.0 : 0.0;
+  const shippingCost = cart.length > 0 ? 12 : 0;
   const finalTotal = Math.max(0, cartTotal - discountAmount + shippingCost);
 
   const renderCartItem = ({ item }: { item: any }) => {
@@ -104,7 +104,7 @@ export default function CartScreen() {
             )}
           </View>
 
-          <Text style={styles.itemPrice}>${item.price.toFixed(2)}</Text>
+          <Text style={styles.itemPrice}>Rp {Number(item.price).toLocaleString('id-ID')}</Text>
         </View>
 
         {/* Quantity Controls & Delete */}
@@ -174,26 +174,26 @@ export default function CartScreen() {
       <View style={styles.breakdownCard}>
         <View style={styles.breakdownRow}>
           <Text style={styles.label}>Subtotal Produk</Text>
-          <Text style={styles.value}>${cartTotal.toFixed(2)}</Text>
+          <Text style={styles.value}>Rp {Number(cartTotal).toLocaleString('id-ID')}</Text>
         </View>
 
         {discountAmount > 0 && (
           <View style={styles.breakdownRow}>
             <Text style={styles.labelDiscount}>Diskon Voucher</Text>
-            <Text style={styles.valueDiscount}>-${discountAmount.toFixed(2)}</Text>
+            <Text style={styles.valueDiscount}>-Rp {Number(discountAmount).toLocaleString('id-ID')}</Text>
           </View>
         )}
 
         <View style={styles.breakdownRow}>
           <Text style={styles.label}>Estimasi Pengiriman</Text>
-          <Text style={styles.value}>${shippingCost.toFixed(2)}</Text>
+          <Text style={styles.value}>Rp {Number(shippingCost).toLocaleString('id-ID')}</Text>
         </View>
 
         <View style={styles.divider} />
 
         <View style={styles.breakdownRow}>
           <Text style={styles.totalLabel}>Total Pembayaran</Text>
-          <Text style={styles.totalValue}>${finalTotal.toFixed(2)}</Text>
+          <Text style={styles.totalValue}>Rp {Number(finalTotal).toLocaleString('id-ID')}</Text>
         </View>
       </View>
     </View>
@@ -215,7 +215,7 @@ export default function CartScreen() {
         <View style={styles.stickyFooter}>
           <View>
             <Text style={styles.footerTotalLabel}>Total Harga</Text>
-            <Text style={styles.footerTotalVal}>${finalTotal.toFixed(2)}</Text>
+            <Text style={styles.footerTotalVal}>Rp {Number(finalTotal).toLocaleString('id-ID')}</Text>
           </View>
 
           <TouchableOpacity

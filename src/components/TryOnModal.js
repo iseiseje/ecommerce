@@ -137,7 +137,7 @@ export default function TryOnModal({ visible, onClose, product }) {
           {resultImage && (
             <View style={styles.resultContainer}>
               <Text style={styles.successText}>✨ Looking great! ✨</Text>
-              <Image source={{ uri: resultImage }} style={styles.resultImage} />
+              <Image source={{ uri: resultImage }} style={styles.resultImage} resizeMode="contain" />
             </View>
           )}
 
@@ -255,7 +255,6 @@ const styles = StyleSheet.create({
     width: '90%',
     flex: 1,
     borderRadius: 12,
-    resizeMode: 'contain',
   },
   footer: {
     padding: 20,

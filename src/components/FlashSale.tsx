@@ -51,7 +51,7 @@ export function FlashSale() {
       .gt('end_time', new Date().toISOString())
       .order('end_time', { ascending: true })
       .limit(1)
-      .single();
+      .maybeSingle();
 
     if (fsError || !fsData) {
       console.log('No active flash sale:', fsError?.message);
@@ -94,8 +94,8 @@ export function FlashSale() {
           <Text style={styles.discountText}>-{discountPercentage}%</Text>
         </View>
         <Text style={styles.itemName} numberOfLines={1}>{p.name}</Text>
-        <Text style={styles.flashPrice}>${Number(item.flash_sale_price).toFixed(2)}</Text>
-        <Text style={styles.originalPrice}>${Number(p.price).toFixed(2)}</Text>
+        <Text style={styles.flashPrice}>Rp {Number(item.flash_sale_price).toLocaleString('id-ID')}</Text>
+        <Text style={styles.originalPrice}>Rp {Number(p.price).toLocaleString('id-ID')}</Text>
         
         {/* Progress Bar */}
         <View style={styles.progressContainer}>

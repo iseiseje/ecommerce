@@ -32,8 +32,21 @@ yarn-error.*
 
 # local env files
 .env
-.env*
+.env.local
+.env.production
+.env.staging
+.env*.local
 RainyPay QRIS API v1.txt
+
+# Supabase CLI temp cache
+supabase/.temp/
+
+# Temporary test scripts
+test_*.php
+check_*.php
+create_policy*.php
+test-*.js
+*.log
 
 # typescript
 *.tsbuildinfo
