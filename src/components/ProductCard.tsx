@@ -28,125 +28,78 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 }) => {
   const { isFavorite, toggleFavorite } = useFavorites();
   const favorite = isFavorite(product.id);
-
-  const rating = product.rating || 4;
-  const mockColors = ['#C8A287', '#565A6F', '#8FD1F4', '#D4B8F5'];
+  const rating = product.rating || 4.8;
 
   return (
     <TouchableOpacity
       style={styles.card}
       onPress={onPress}
-      activeOpacity={0.95}
+      activeOpacity={0.92}
     >
-      {/* Image Area */}
+      {/* Image Container */}
       <View style={styles.imageContainer}>
-        {/* Top Header inside Image */}
-        <View style={styles.imageTopNav}>
-          <TouchableOpacity style={styles.navButton}>
-            <Ionicons name="arrow-back-outline" size={20} color="#111" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navButton}>
-            <Ionicons name="bag" size={20} color="#333" />
-            <View style={styles.bagBadge}>
-              <Text style={styles.bagBadgeText}>2</Text>
-            </View>
-          </TouchableOpacity>
-        </View>
-
         <Image
-          source={{ uri: product.image_url || 'https://via.placeholder.com/300' }}
+          source={{ uri: product.image_url || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600' }}
           style={styles.image}
-          resizeMode="contain"
+          resizeMode="cover"
         />
-        
-        {/* Carousel Dots */}
-        <View style={styles.carouselDots}>
-          <View style={[styles.dot, styles.dotActive]} />
-          <View style={styles.dot} />
-          <View style={styles.dot} />
-          <View style={styles.dot} />
-          <View style={styles.dot} />
-        </View>
 
-        {/* Floating Heart Button */}
+        {/* Floating Favorite Heart */}
         <TouchableOpacity
           style={styles.favoriteButton}
-          onPress={() => toggleFavorite(product)}
+          onPress={(e) => {
+            e.stopPropagation();
+            toggleFavorite(product);
+          }}
           activeOpacity={0.8}
         >
           <Ionicons
-            name="heart"
-            size={18}
-            color={favorite ? '#FF4D4D' : '#D1D5DB'}
+            name={favorite ? 'heart' : 'heart-outline'}
+            size={16}
+            color={favorite ? '#EF4444' : '#64748B'}
           />
         </TouchableOpacity>
       </View>
 
-      {/* Product Details Area */}
-      <View style={styles.detailsContainer}>
-        <Text style={styles.brandText}>{product.category || 'Brand'}</Text>
-        
-        <View style={styles.titleRow}>
-          <Text style={styles.titleText} numberOfLines={1}>
-            {product.name}
+      {/* Product Information */}
+      <View style={styles.content}>
+        <View style={styles.categoryRow}>
+          <Text style={styles.categoryText} numberOfLines={1}>
+            {product.category || 'Product'}
           </Text>
-          <View style={styles.starsContainer}>
-            {[1, 2, 3, 4, 5].map((star) => (
-              <Ionicons
-                key={star}
-                name={star <= rating ? 'star' : 'star-outline'}
-                size={12}
-                color="#FFB300"
-              />
-            ))}
+          <View style={styles.ratingBadge}>
+            <Ionicons name="star" size={10} color="#F59E0B" />
+            <Text style={styles.ratingText}>{rating}</Text>
           </View>
         </View>
 
-        {/* Color and Size Pickers */}
-        <View style={styles.optionsContainer}>
-          <View style={styles.optionGroup}>
-            <Text style={styles.optionLabel}>COLOR</Text>
-            <View style={styles.colorsRow}>
-              {mockColors.map((color, index) => (
-                <View key={index} style={[styles.colorRing, index === 0 && styles.colorRingActive]}>
-                  <View style={[styles.colorDot, { backgroundColor: color }]}>
-                    {index === 0 && <Ionicons name="checkmark" size={10} color="#FFF" />}
-                  </View>
-                </View>
-              ))}
-            </View>
-          </View>
-
-          <View style={styles.optionGroup}>
-            <Text style={styles.optionLabel}>SIZE</Text>
-            <View style={styles.sizePicker}>
-              <Text style={styles.sizeText}>Small</Text>
-              <Ionicons name="chevron-down" size={12} color="#666" />
-            </View>
-          </View>
-        </View>
-
-        {/* Dummy Description */}
-        <Text style={styles.descriptionText} numberOfLines={2}>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.
+        <Text style={styles.titleText} numberOfLines={2}>
+          {product.name}
         </Text>
 
-        {/* Price and Cart Button */}
-        <View style={styles.actionRow}>
+        {/* Price & Action Row */}
+        <View style={styles.footerRow}>
           <View style={styles.priceContainer}>
-            <Text style={styles.priceText}>Rp {product.price.toLocaleString('id-ID')}</Text>
+            <Text style={styles.priceText} numberOfLines={1}>
+              Rp {Number(product.price).toLocaleString('id-ID')}
+            </Text>
+            {product.original_price && product.original_price > product.price ? (
+              <Text style={styles.originalPriceText} numberOfLines={1}>
+                Rp {Number(product.original_price).toLocaleString('id-ID')}
+              </Text>
+            ) : null}
           </View>
-          
+
           {onAddToCart && (
             <TouchableOpacity
-              style={styles.addToCartBtn}
+              style={styles.cartButton}
               onPress={(e) => {
                 e.stopPropagation();
                 onAddToCart();
               }}
               activeOpacity={0.8}
             >
-              <Text style={styles.addToCartText}>ADD TO CART +</Text>
+              <Ionicons name="add" size={18} color="#FFFFFF" />
             </TouchableOpacity>
           )}
         </View>
@@ -158,204 +111,109 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 const styles = StyleSheet.create({
   card: {
     backgroundColor: '#FFFFFF',
-    marginBottom: 24,
-    width: '100%',
+    borderRadius: 16,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 12,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+    flex: 1,
   },
   imageContainer: {
     width: '100%',
-    height: 280,
-    backgroundColor: '#F5F6F8',
+    height: 150,
+    backgroundColor: '#F8FAFC',
     position: 'relative',
   },
   image: {
     width: '100%',
     height: '100%',
   },
-  imageTopNav: {
-    position: 'absolute',
-    top: 16,
-    left: 16,
-    right: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    zIndex: 10,
-  },
-  navButton: {
-    padding: 4,
-    position: 'relative',
-  },
-  bagBadge: {
-    position: 'absolute',
-    top: 6,
-    right: 2,
-    backgroundColor: '#000',
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  bagBadgeText: {
-    color: '#FFF',
-    fontSize: 8,
-    fontWeight: 'bold',
-  },
-  carouselDots: {
-    position: 'absolute',
-    bottom: 20,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 6,
-  },
-  dot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: '#D1D5DB',
-  },
-  dotActive: {
-    backgroundColor: '#9CA3AF',
-  },
   favoriteButton: {
     position: 'absolute',
-    bottom: -20,
-    right: 24,
-    backgroundColor: '#FFFFFF',
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 4,
-    zIndex: 20,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  detailsContainer: {
-    paddingTop: 16,
-    paddingHorizontal: 16,
-    paddingBottom: 16,
+  content: {
+    padding: 10,
+    flex: 1,
+    justifyContent: 'space-between',
   },
-  brandText: {
-    fontSize: 12,
-    color: '#9CA3AF',
-    fontWeight: '500',
+  categoryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 4,
   },
-  titleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  titleText: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#1F2937',
+  categoryText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#64748B',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
     flex: 1,
-    marginRight: 10,
+    marginRight: 4,
   },
-  starsContainer: {
+  ratingBadge: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: 2,
   },
-  optionsContainer: {
-    flexDirection: 'row',
-    marginBottom: 16,
-    gap: 40,
-  },
-  optionGroup: {
-    flex: 1,
-  },
-  optionLabel: {
+  ratingText: {
     fontSize: 10,
-    color: '#6B7280',
-    marginBottom: 8,
-    fontWeight: '600',
-    letterSpacing: 0.5,
+    fontWeight: '700',
+    color: '#0F172A',
   },
-  colorsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  colorRing: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 1,
-    borderColor: 'transparent',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  colorRingActive: {
-    borderColor: '#C8A287',
-  },
-  colorDot: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  sizePicker: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#F9FAFB',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    alignSelf: 'flex-start',
-    minWidth: 80,
-  },
-  sizeText: {
-    fontSize: 12,
-    color: '#4B5563',
-    marginRight: 8,
-  },
-  descriptionText: {
-    fontSize: 12,
-    color: '#6B7280',
+  titleText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#0F172A',
     lineHeight: 18,
-    marginBottom: 20,
+    marginBottom: 8,
+    height: 36,
   },
-  actionRow: {
+  footerRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 12,
+    marginTop: 'auto',
+    gap: 4,
   },
   priceContainer: {
-    borderWidth: 1,
-    borderColor: '#6B7280',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    minWidth: 100,
-    alignItems: 'center',
+    flex: 1,
   },
   priceText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1F2937',
-  },
-  addToCartBtn: {
-    flex: 1,
-    backgroundColor: '#4FD1C5',
-    paddingVertical: 11,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  addToCartText: {
-    color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '600',
-    letterSpacing: 0.5,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  originalPriceText: {
+    fontSize: 10,
+    color: '#94A3B8',
+    textDecorationLine: 'line-through',
+    marginTop: 1,
+  },
+  cartButton: {
+    backgroundColor: '#0F172A',
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

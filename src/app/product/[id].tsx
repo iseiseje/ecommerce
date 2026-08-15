@@ -307,6 +307,6 @@ const styles = StyleSheet.create({
   floatingBar: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: '#FFFFFF', paddingHorizontal: 20, paddingVertical: 14, borderTopWidth: 1, borderTopColor: '#E2E8F0', flexDirection: 'row', gap: 12, shadowColor: '#0F172A', shadowOffset: { width: 0, height: -4 }, shadowOpacity: 0.06, shadowRadius: 10, elevation: 8 },
   tryOnButton: { flex: 1, backgroundColor: '#F1F5F9', paddingVertical: 14, borderRadius: 14, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8 },
   tryOnButtonText: { color: '#0F172A', fontWeight: '700', fontSize: 14 },
-  addToCartButton: { flex: 1.2, backgroundColor: '#4FD1C5', paddingVertical: 14, borderRadius: 14, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8 },
-  addToCartText: { color: '#FFFFFF', fontWeight: '700', fontSize: 14, letterSpacing: 0.5 },
+  addToCartButton: { flex: 1.2, backgroundColor: '#0F172A', paddingVertical: 14, borderRadius: 14, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8 },
+  addToCartText: { color: '#FFFFFF', fontWeight: '700', fontSize: 14 },
 });
