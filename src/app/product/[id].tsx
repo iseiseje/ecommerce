@@ -35,12 +35,15 @@ const MOCK_FALLBACK: Record<string, any> = {
   }
 };
 
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 export default function ProductDetailScreen() {
   const { id } = useLocalSearchParams();
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isTryOnVisible, setTryOnVisible] = useState(false);
   const { width: screenWidth } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
 
   // Selected variants
   const [selectedVariants, setSelectedVariants] = useState<Record<string, any>>({});
@@ -243,7 +246,7 @@ export default function ProductDetailScreen() {
         </ScrollView>
 
         {/* Floating Bottom Action Bar */}
-        <View style={styles.floatingBar}>
+        <View style={[styles.floatingBar, { paddingBottom: Math.max(insets.bottom, 14) }]}>
           <TouchableOpacity
             style={styles.tryOnButton}
             onPress={() => setTryOnVisible(true)}

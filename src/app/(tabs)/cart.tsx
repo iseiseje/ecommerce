@@ -15,12 +15,14 @@ import { EmptyState } from '../../components/EmptyState';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../utils/supabase';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function CartScreen() {
   const { cart, updateQuantity, removeFromCart, cartTotal } = useCart();
   const [promoCode, setPromoCode] = useState('');
   const [discountAmount, setDiscountAmount] = useState(0);
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const handleApplyPromo = async () => {
     if (!promoCode.trim()) {
@@ -212,7 +214,7 @@ export default function CartScreen() {
         />
 
         {/* Sticky Checkout Bar */}
-        <View style={styles.stickyFooter}>
+        <View style={[styles.stickyFooter, { paddingBottom: Math.max(insets.bottom, 12) }]}>
           <View>
             <Text style={styles.footerTotalLabel}>Total Harga</Text>
             <Text style={styles.footerTotalVal}>Rp {Number(finalTotal).toLocaleString('id-ID')}</Text>

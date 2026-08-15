@@ -16,10 +16,12 @@ import { supabase } from '../utils/supabase';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function CheckoutScreen() {
   const { cart, cartTotal, clearCart } = useCart();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const [loading, setLoading] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState<'qris' | 'va' | 'ewallet'>('qris');
@@ -291,7 +293,7 @@ export default function CheckoutScreen() {
         </ScrollView>
 
         {/* Bottom Pay Button */}
-        <View style={styles.footer}>
+        <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 14) }]}>
           <TouchableOpacity
             style={[styles.payButton, loading && styles.disabledButton]}
             onPress={handleCheckout}

@@ -3,10 +3,15 @@ import { useCart } from '../../context/CartContext';
 import { useFavorites } from '../../context/FavoritesContext';
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabLayout() {
   const { cartItemCount } = useCart();
   const { favoritesCount } = useFavorites();
+  const insets = useSafeAreaInsets();
+
+  const bottomPadding = Math.max(insets.bottom, Platform.OS === 'ios' ? 24 : 16);
+  const tabHeight = 56 + bottomPadding;
 
   return (
     <Tabs
@@ -14,7 +19,13 @@ export default function TabLayout() {
         headerShown: true,
         tabBarActiveTintColor: '#0F172A',
         tabBarInactiveTintColor: '#94A3B8',
-        tabBarStyle: styles.tabBar,
+        tabBarStyle: [
+          styles.tabBar,
+          {
+            height: tabHeight,
+            paddingBottom: bottomPadding,
+          },
+        ],
         tabBarLabelStyle: styles.tabBarLabel,
         headerStyle: styles.header,
         headerTitleStyle: styles.headerTitle,
@@ -72,8 +83,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
     borderTopColor: '#F1F5F9',
-    height: Platform.OS === 'ios' ? 88 : 65,
-    paddingBottom: Platform.OS === 'ios' ? 28 : 10,
     paddingTop: 8,
     elevation: 8,
     shadowColor: '#0F172A',
