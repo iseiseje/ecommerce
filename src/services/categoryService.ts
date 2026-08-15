@@ -128,8 +128,9 @@ export const deleteCategory = async (id: string): Promise<boolean> => {
  * Automatically triggers callback whenever INSERT, UPDATE, or DELETE happens in Supabase!
  */
 export const subscribeToCategoryChanges = (onUpdate: () => void) => {
+  const channelName = `category-changes-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
   const channel = supabase
-    .channel('public:categories')
+    .channel(channelName)
     .on(
       'postgres_changes',
       {

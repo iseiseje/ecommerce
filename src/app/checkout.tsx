@@ -25,17 +25,36 @@ export default function CheckoutScreen() {
   const [selectedMethod, setSelectedMethod] = useState<'qris' | 'va' | 'ewallet'>('qris');
   const [shippingMethod, setShippingMethod] = useState<'regular' | 'express'>('regular');
   const [formData, setFormData] = useState({
-    name: 'Sanjaya User',
-    email: 'sanjaya@example.com',
-    address: 'Jl. Jenderal Sudirman No. 45, Jakarta Selatan',
+    name: '',
+    email: '',
+    address: '',
   });
 
-  const shippingFee = shippingMethod === 'express' ? 15 : 12;
-  const finalTotal = cartTotal + shippingFee;
+  React.useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  const fetchUserData = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setFormData((prev) => ({
+          ...prev,
+          name: user.user_metadata?.full_name || user.email?.split('@')[0] || '',
+          email: user.email || '',
+        }));
+      }
+    } catch (e) {
+      console.log('Error fetching user info for checkout:', e);
+    }
+  };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
+
+  const shippingFee = shippingMethod === 'express' ? 15 : 12;
+  const finalTotal = cartTotal + shippingFee;
 
   const handleCheckout = async () => {
     if (!formData.name || !formData.email || !formData.address) {

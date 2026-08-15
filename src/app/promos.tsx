@@ -13,8 +13,9 @@ export default function PromosScreen() {
     fetchPromos();
 
     // Subscribe to realtime changes
+    const channelName = `promo-changes-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
     const channel = supabase
-      .channel('schema-db-changes')
+      .channel(channelName)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'promos' }, () => {
         fetchPromos();
       })

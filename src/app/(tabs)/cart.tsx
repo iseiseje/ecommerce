@@ -61,9 +61,9 @@ export default function CartScreen() {
       }
 
       let disc = 0;
-      if (data.discount_type === 'percentage') {
+      if (data.discount_type === 'percentage' || data.discount_type === 'percent') {
         disc = cartTotal * (Number(data.discount_value) / 100);
-        if (data.max_discount && disc > Number(data.max_discount)) {
+        if (data.max_discount && Number(data.max_discount) > 0 && disc > Number(data.max_discount)) {
           disc = Number(data.max_discount);
         }
       } else {

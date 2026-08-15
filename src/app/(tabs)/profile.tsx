@@ -18,19 +18,14 @@ import { useFavorites } from '../../context/FavoritesContext';
 import { useCart } from '../../context/CartContext';
 import { Linking } from 'react-native';
 
-const MENU_ITEMS = [
-  { id: 'orders', title: 'Pesanan Saya', icon: 'cube-outline', route: '/orders', badge: '2 Aktif' },
-  { id: 'address', title: 'Alamat Pengiriman', icon: 'location-outline', route: '/address' },
-  { id: 'payment', title: 'Metode Pembayaran', icon: 'card-outline' },
-  { id: 'tryon', title: 'Galeri Virtual Try-On', icon: 'sparkles-outline' },
-  { id: 'promos', title: 'Promo', icon: 'pricetag-outline', route: '/promos' },
-  { id: 'help', title: 'Hubungi CS (WhatsApp)', icon: 'logo-whatsapp', isExternal: true },
-];
+
 
 export default function ProfileScreen() {
   const { user, loading: authLoading, signOut } = useAuth();
   const [history, setHistory] = useState<any[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [ordersCount, setOrdersCount] = useState(0);
+  const [activeOrdersCount, setActiveOrdersCount] = useState(0);
 
   const { favoritesCount } = useFavorites();
   const { cartItemCount } = useCart();
@@ -38,11 +33,33 @@ export default function ProfileScreen() {
 
   useEffect(() => {
     if (user?.id) {
+      fetchUserOrders(user.id);
       fetchTryonHistory(user.id);
     } else {
+      setOrdersCount(0);
+      setActiveOrdersCount(0);
       setHistory([]);
     }
   }, [user]);
+
+  const fetchUserOrders = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('id, status')
+        .eq('user_id', userId);
+
+      if (!error && data) {
+        setOrdersCount(data.length);
+        const active = data.filter(
+          (o) => o.status !== 'Selesai' && o.status !== 'Dibatalkan'
+        ).length;
+        setActiveOrdersCount(active);
+      }
+    } catch (e) {
+      console.error('Error fetching user orders:', e);
+    }
+  };
 
   const fetchTryonHistory = async (userId: string) => {
     setHistoryLoading(true);
@@ -62,6 +79,28 @@ export default function ProfileScreen() {
       setHistoryLoading(false);
     }
   };
+
+  const getVipBadgeText = () => {
+    if (ordersCount >= 5) return 'VIP GOLD';
+    if (ordersCount >= 2) return 'GOLD MEMBER';
+    if (ordersCount >= 1) return 'SILVER MEMBER';
+    return 'MEMBER';
+  };
+
+  const menuItems = [
+    {
+      id: 'orders',
+      title: 'Pesanan Saya',
+      icon: 'cube-outline',
+      route: '/orders',
+      badge: activeOrdersCount > 0 ? `${activeOrdersCount} Aktif` : undefined,
+    },
+    { id: 'address', title: 'Alamat Pengiriman', icon: 'location-outline', route: '/address' },
+    { id: 'payment', title: 'Metode Pembayaran', icon: 'card-outline' },
+    { id: 'tryon', title: 'Galeri Virtual Try-On', icon: 'sparkles-outline', route: '/tryon-gallery' },
+    { id: 'promos', title: 'Promo', icon: 'pricetag-outline', route: '/promos' },
+    { id: 'help', title: 'Hubungi CS (WhatsApp)', icon: 'logo-whatsapp', isExternal: true },
+  ];
 
   const handleMenuPress = (item: any) => {
     if (item.isExternal && item.id === 'help') {
@@ -101,7 +140,7 @@ export default function ProfileScreen() {
               </Text>
               {user && (
                 <View style={styles.vipBadge}>
-                  <Text style={styles.vipText}>VIP GOLD</Text>
+                  <Text style={styles.vipText}>{getVipBadgeText()}</Text>
                 </View>
               )}
             </View>
@@ -120,9 +159,9 @@ export default function ProfileScreen() {
         </View>
 
         {/* Stats Row */}
-        <View style={styles.statsRow}>
+        <TouchableOpacity style={styles.statsRow} onPress={() => router.push('/orders')}>
           <View style={styles.statBox}>
-            <Text style={styles.statVal}>3</Text>
+            <Text style={styles.statVal}>{ordersCount}</Text>
             <Text style={styles.statLabel}>Pesanan</Text>
           </View>
           <View style={styles.statDivider} />
@@ -135,12 +174,12 @@ export default function ProfileScreen() {
             <Text style={styles.statVal}>{cartItemCount}</Text>
             <Text style={styles.statLabel}>Keranjang</Text>
           </TouchableOpacity>
-        </View>
+        </TouchableOpacity>
 
         {/* Menu Items */}
         <View style={styles.menuContainer}>
           <Text style={styles.sectionTitle}>Pengaturan Akun</Text>
-          {MENU_ITEMS.map((item) => (
+          {menuItems.map((item) => (
             <TouchableOpacity
               key={item.id}
               style={styles.menuItem}
